@@ -1,5 +1,5 @@
 # Teoria de lenguajes, automatas y compiladores 
-#TPE
+# TPE
 ## Building the parser
 To compile the pareser you can use the built-in script by running
 ```
