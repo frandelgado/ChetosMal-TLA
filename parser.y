@@ -20,7 +20,7 @@ FILE *yyout;
 %token <number> NUMBER 
 %token <cmd> OPEN_LOOP CLOSE_LOOP SUM SUB MUL DIV VAR
 %token <cmd> ASSIGN END GREATER LESSER END_LINE 
-%type <number> statement
+%type <number> operation statement
 
 %start file
 
@@ -31,15 +31,15 @@ file: 	  file statement
 		;
 
 statement:    VAR ID ASSIGN STRING END_LINE { fprintf(yyout, "char* %s = \"%s\";\n", $2, $4); }
-            | VAR ID ASSIGN NUMBER END_LINE { fprintf(yyout, "double %s = %f;\n", $2, $4); }
+            | VAR ID ASSIGN operation END_LINE { fprintf(yyout, "double %s = %f;\n", $2, $4); }
             | ID ASSIGN STRING END_LINE { fprintf(yyout, "%s = \"%s\";\n", $1, $3); }
-            | ID ASSIGN NUMBER END_LINE { fprintf(yyout, "%s = %f;\n", $1, $3); }
+            | ID ASSIGN operation END_LINE { fprintf(yyout, "%s = %f;\n", $1, $3); }
 
 
-NUMBER:    NUMBER SUM NUMBER { $$ = $1 + $3; }
-            | NUMBER SUB NUMBER { $$ = $1 + $3; }
-            | NUMBER MUL NUMBER { $$ = $1 * $3; }
-            | NUMBER DIV NUMBER {
+operation:    operation SUM operation { $$ = $1 + $3; }
+            | operation SUB operation { $$ = $1 + $3; }
+            | operation MUL operation { $$ = $1 * $3; }
+            | operation DIV operation {
                                         if($3 == 0.0)
                                             yyerror("Attempt to divde by zero");
                                         else
