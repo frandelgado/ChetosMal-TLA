@@ -3,11 +3,12 @@
 #include <string.h>
 #include <stdlib.h>
     
-int screen_done = 1; /* 1 if done, 0 otherwise */
-char *act_str;   /* extra argument for an action */
-char *cmd_str;   /* extra argument for command */
-char *item_str;  /* extra argument for 
-                  * item description */
+int parsing_done = 1; 
+int yydebug = 1;
+
+void warning(char *s, char *t);
+void yyerror (char const *s);
+FILE *yyout;
 %}
 
 %union {
@@ -15,32 +16,34 @@ char *item_str;  /* extra argument for
     double    number;          /* command value */
 }
 
-%token <string> STRING
+%token <string> STRING ID
 %token <number> NUMBER 
-%token <cmd> OPEN_LOOP CLOSE_LOOP SUM SUB MUL DIV
-%token <cmd> ASSIGN END GREATER LESSER END_LINE
-%type <cmd> action line attribute command
-%type <string> id 
-%token <number> operation
+%token <cmd> OPEN_LOOP CLOSE_LOOP SUM SUB MUL DIV VAR
+%token <cmd> ASSIGN END GREATER LESSER END_LINE 
+%type <number> statement
 
-%start screens
+%start file
 
 %%
 
-statement:    VAR ID ASSIGN STRING END_LINE { printf("char* %s = %s\n", $2, $4); }
-            | VAR ID ASSIGN operation END_LINE { printf("double %s = %d\n", $2, $4); }
-            | ID ASSIGN STRING END_LINE { printf("%s = %s\n", $1, $3); }
-            | ID ASSIGN operation END_LINE { printf("%s = %d\n", $1, $3); }
+file: 	  file statement
+		| statement
+		;
+
+statement:    VAR ID ASSIGN STRING END_LINE { fprintf(yyout, "char* %s = \"%s\";\n", $2, $4); }
+            | VAR ID ASSIGN NUMBER END_LINE { fprintf(yyout, "double %s = %f;\n", $2, $4); }
+            | ID ASSIGN STRING END_LINE { fprintf(yyout, "%s = \"%s\";\n", $1, $3); }
+            | ID ASSIGN NUMBER END_LINE { fprintf(yyout, "%s = %f;\n", $1, $3); }
 
 
-operation:    operation SUM operation { $$ = $1 + $3 }
-            | operation SUB operation { $$ = $1 + $3 }
-            | operation MUL operation { $$ = $1 * $3 }
-            | operation DIV operation {
+NUMBER:    NUMBER SUM NUMBER { $$ = $1 + $3; }
+            | NUMBER SUB NUMBER { $$ = $1 + $3; }
+            | NUMBER MUL NUMBER { $$ = $1 * $3; }
+            | NUMBER DIV NUMBER {
                                         if($3 == 0.0)
                                             yyerror("Attempt to divde by zero");
                                         else
-                                            $$ = $1 / $3
+                                            $$ = $1 / $3;
                                      }
             | NUMBER
             ;
@@ -49,12 +52,13 @@ operation:    operation SUM operation { $$ = $1 + $3 }
 char *progname = "mgl";
 int lineno = 1;
 
-#define DEFAULT_OUTFILE "screen.out"
+#define DEFAULT_OUTFILE "out.c"
 
 char *usage = "%s: usage [infile] [outfile]\n";
 
+
+void main(int argc, char **argv)
 {
-main(int argc, char **argv)
 	char *outfile;
 	char *infile;
 	extern FILE *yyin, *yyout;
@@ -101,10 +105,8 @@ main(int argc, char **argv)
     
 	yyparse();
     
-	end_file(); /* write out any final information */
-    
 	/* now check EOF condition */
-	if(!screen_done) /* in the middle of a screen */
+	if(!parsing_done) /* in the middle of a screen */
 	{
         	warning("Premature EOF",(char *)0);
 		unlink(outfile); /* remove bad file */
@@ -113,10 +115,14 @@ main(int argc, char **argv)
 	exit(0); /* no error */
 }
 
-warning(char *s, char *t) /* print warning message */
+void warning(char *s, char *t) /* print warning message */
 {
 	fprintf(stderr, "%s: %s", progname, s);
 	if (t)
 		fprintf(stderr, " %s", t);
 	fprintf(stderr, " line %d\n", lineno);
 }
+
+void yyerror (char const *s) {
+   fprintf (stderr, "%s\n", s);
+ }

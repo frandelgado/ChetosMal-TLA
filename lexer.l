@@ -1,5 +1,5 @@
 %{
-#include "parser.h"
+#include "y.tab.h"
 #include <string.h>
 
 extern int lineno;
