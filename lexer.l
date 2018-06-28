@@ -27,7 +27,7 @@ nl        \n
             return STRING; 
     }
     else{
-        yylval.number = atoi(yytext);
+        yylval.number = strdup(yytext);
         return NUMBER;
     }
     }
@@ -42,6 +42,8 @@ division        { return DIV; }
 while_end       { return CLOSE_LOOP; }
 assignment      { return ASSIGN; }
 end_line        { return END_LINE; }
+par_open        { return PARENTHESIS_OPENED; }
+par_close       { return PARENTHESIS_CLOSED; }
 {id}            { yylval.symp = symlook(yytext);
                   return ID;
                 }

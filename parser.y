@@ -19,26 +19,31 @@ FILE *yyout;
 %union {
     char    *string;     /* string buffer */
     double    number;          /* command value */
-	struct symtab *symp
+	struct symtab *symp;
+	struct value *valuep
 }
 
-%token <string> STRING 
+%token <string> STRING
 %token <symp> ID
 %token <number> NUMBER 
 %token <cmd> OPEN_LOOP CLOSE_LOOP SUM SUB MUL DIV VAR
-%token <cmd> ASSIGN GREATER LESSER IF END_LINE 
-%type <number> operation statement
-%type <variable> value
+%token <cmd> ASSIGN GREATER GREATER_EQ LESSER LESSER_EQ
+%token <cmd> NOT AND OR
+%token <cmd> SUM SUB MUL DIV MOD
+%token <cmd> END_LINE PRINT
+%token <cmd> PARENTHESIS_OPENED PARENTHESIS_CLOSED
+%token <cmd> IF THEN ELSE END_IF WHILE DO END_WHILE
+%type <cmd> statements statement
+%type <valuep> value operation
+%type <string> bool_exp logic_op condition
 
 %start statements
 
 %%
 
-statements: 			statements statement
-					| 	statement
-					;
-
-
+statements:   statements statement
+			| statement
+			;
 
 statement:   
 			  VAR ID END_LINE
@@ -50,11 +55,11 @@ statement:
 			| WHILE condition DO statements END_WHILE
 			;
 
-value: 	  STRING
-		| NUMBER
-		| operation
-		| ID
-		;
+value:	 	  STRING {$$->var_type = STRING; $$->str = $1;}
+			| NUMBER {$$->var_type = NUMBER; $$->str = $1;}
+			| operation {$$->var_type = $1->var_type; $$->str = $1->str;}
+			| ID {//if undef abort}
+			;
 
 		
 condition: 	  NOT condition 
@@ -62,7 +67,7 @@ condition: 	  NOT condition
 			| bool_exp
 			;
 
-bool_exp: value comparation value 		{$$->str = writeBool($1, $2->operand, $3); };
+bool_exp: 	  value comparation value 		{$$ = writeBool($1, $2->operand, $3); };
 
 comparation:  GREATER 		{ $$->operand = GREATER }
 			| LESSER  		{ $$->operand = LESSER }
@@ -72,11 +77,11 @@ comparation:  GREATER 		{ $$->operand = GREATER }
 			| NOT_EQUALS	{ $$->operand = NOT_EQUALS }
 			;
 
-logic_op: 	  AND		{ $$->str = "&&" } 
-			| OR 		{ $$->str = "||" }
+logic_op: 	  AND		{ $$ = "&&" } 
+			| OR 		{ $$ = "||" }
 			;
 
-operation:    value SUM value { $$ = $1 + $3; }
+operation:    value SUM value { $$ = $1 + $3; } "1 + num1" SUM "\"hola\"" -> "strcat(itoa(1+num1),\"hola\")"
             | value SUB value { $$ = $1 + $3; }
             | value MUL value { $$ = $1 * $3; }
             | value DIV value {
