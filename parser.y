@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "parser.h"
+
+#define FLOAT_DEC_PTS "%.10f"
     
 int parsing_done = 1; 
 int yydebug = 1;
@@ -14,9 +17,11 @@ FILE *yyout;
 %union {
     char    *string;     /* string buffer */
     double    number;          /* command value */
+	struct symtab *symp
 }
 
-%token <string> STRING ID
+%token <string> STRING 
+%token <symp> ID
 %token <number> NUMBER 
 %token <cmd> OPEN_LOOP CLOSE_LOOP SUM SUB MUL DIV VAR
 %token <cmd> ASSIGN END GREATER LESSER END_LINE 
@@ -30,10 +35,15 @@ file: 	  file statement
 		| statement
 		;
 
-statement:    VAR ID ASSIGN STRING END_LINE { fprintf(yyout, "char* %s = \"%s\";\n", $2, $4); }
-            | VAR ID ASSIGN operation END_LINE { fprintf(yyout, "double %s = %f;\n", $2, $4); }
-            | ID ASSIGN STRING END_LINE { fprintf(yyout, "%s = \"%s\";\n", $1, $3); }
-            | ID ASSIGN operation END_LINE { fprintf(yyout, "%s = %f;\n", $1, $3); }
+statement:    VAR ID ASSIGN STRING END_LINE { fprintf(yyout, "char* %s = \"%s\";\n", $2->name, $4);
+											  $2->stringVal = $4;
+											}
+            | VAR ID ASSIGN operation END_LINE { fprintf(yyout, "double %s = %f;\n", $2->name, $4);
+												 $2->doubleVal = $4;
+												 }
+            | ID ASSIGN STRING END_LINE { fprintf(yyout, "%s = \"%s\";\n", $1->name, $3); }
+            | ID ASSIGN operation END_LINE { fprintf(yyout, "%s = %f;\n", $1->name, $3); }
+			;
 
 
 operation:    operation SUM operation { $$ = $1 + $3; }
@@ -126,3 +136,27 @@ void warning(char *s, char *t) /* print warning message */
 void yyerror (char const *s) {
    fprintf (stderr, "%s\n", s);
  }
+
+/* look up a symbol table entry, add if not present */
+struct symtab *
+symlook(s)
+char *s;
+{
+	char *p;
+	struct symtab *sp;
+	
+	for(sp = symtab; sp < &symtab[NSYMS]; sp++) {
+		/* is it already here? */
+		if(sp->name && !strcmp(sp->name, s))
+			return sp;
+		
+		/* is it free */
+		if(!sp->name) {
+			sp->name = strdup(s);
+			return sp;
+		}
+		/* otherwise continue to next */
+	}
+	yyerror("Too many symbols");
+	exit(1);	/* cannot continue */
+} /* symlook */

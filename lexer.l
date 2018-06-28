@@ -1,5 +1,6 @@
 %{
 #include "y.tab.h"
+#include "parser.h"
 #include <string.h>
 
 extern int lineno;
@@ -42,7 +43,7 @@ while_end       { return CLOSE_LOOP; }
 assignment      { return ASSIGN; }
 end_line        { return END_LINE; }
 end             { return END; }
-{id}            { yylval.string = strdup(yytext);
+{id}            { yylval.symp = symlook(yytext);
                   return ID;
                 }
 {nl}            { lineno++; }
