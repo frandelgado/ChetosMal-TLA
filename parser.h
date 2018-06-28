@@ -16,7 +16,21 @@ struct value{
     char * str;
     var_type_t var_type;
 };
+/*
+Map<String, Value> varMap;
 
+Value {
+    double numValue;
+    string strValue;
+}
+
+num add 1 //.dank
+
+varMap.get("num").numValue = 1 //.c
+
+var asd //.dank
+
+*/
 
 
 struct symtab *symlook();

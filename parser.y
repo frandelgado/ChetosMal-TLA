@@ -236,9 +236,22 @@ void main(int argc, char **argv)
     
 	/* normal interaction on yyin and 
 	   yyout from now on */
-    fprintf(yyout, "int asd(){\n");
+    fprintf(yyout, 
+	"#define KEY_MAX_LENGTH (256)
+#define KEY_PREFIX ("somekey")
+#define KEY_COUNT (1024*1024)
+
+typedef struct data_struct_s
+{
+    char key_string[KEY_MAX_LENGTH];
+    int number;
+} data_struct_t;" //TODO
+	"#include<hashmap.h>\n"+
+	"hashmap var_map;\n"+
+	"int main(){\n"+
+	"varmap = hashmap_new();\n");
 	yyparse();
-	fprintf(yyout, "\n}");
+	fprintf(yyout, "\nreturn 0;}");
     
 	/* now check EOF condition */
 	if(!parsing_done) /* in the middle of a screen */
