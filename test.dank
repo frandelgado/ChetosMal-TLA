@@ -2,4 +2,5 @@ var num1 assignment 2 end_line
 var num2 assignment 3 end_line
 var string1 assignment "Three" end_line
 var sum1 assignment 5 addition 4 end_line
+sum5 assignment 7 end_line
 var sum2 assignment num1 addition num2 end_line

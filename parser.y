@@ -11,6 +11,8 @@ int yydebug = 1;
 
 void warning(char *s, char *t);
 void yyerror (char const *s);
+void symIsDeclared(char const *s);
+void symDeclare(char const *s);
 FILE *yyout;
 %}
 
@@ -37,12 +39,18 @@ file: 	  file statement
 
 statement:    VAR ID ASSIGN STRING END_LINE { fprintf(yyout, "char* %s = \"%s\";\n", $2->name, $4);
 											  $2->stringVal = $4;
+											  symDeclare($2->name);
 											}
-            | VAR ID ASSIGN operation END_LINE { fprintf(yyout, "double %s = %f;\n", $2->name, $4);
-												 $2->doubleVal = $4;
-												 }
-            | ID ASSIGN STRING END_LINE { fprintf(yyout, "%s = \"%s\";\n", $1->name, $3); }
-            | ID ASSIGN operation END_LINE { fprintf(yyout, "%s = %f;\n", $1->name, $3); }
+            | VAR ID ASSIGN operation END_LINE	{ fprintf(yyout, "double %s = %f;\n", $2->name, $4);
+												  $2->doubleVal = $4;
+												  symDeclare($2->name);
+											  	}
+            | ID ASSIGN STRING END_LINE { symIsDeclared($1->name);
+										  fprintf(yyout, "%s = \"%s\";\n", $1->name, $3); 
+										}
+            | ID ASSIGN operation END_LINE 	{	symIsDeclared($1->name);
+												fprintf(yyout, "%s = %f;\n", $1->name, $3); 
+											}
 			;
 
 
@@ -137,10 +145,27 @@ void yyerror (char const *s) {
    fprintf (stderr, "%s\n", s);
  }
 
+void symDeclare(char const *s)
+{	
+	struct symtab *sp;
+	for(sp = symtab; sp < &symtab[NSYMS]; sp++) {
+		if(sp->name && !strcmp(sp->name, s))
+			 sp->isDeclared = 1;
+	}
+}
+void symIsDeclared(char const *s)
+{	
+	struct symtab *sp;
+	for(sp = symtab; sp < &symtab[NSYMS]; sp++) {
+		if(sp->name && !strcmp(sp->name, s))
+			if(sp->isDeclared)
+				return;
+	}
+	yyerror("Variable is not declared");
+}
+
 /* look up a symbol table entry, add if not present */
-struct symtab *
-symlook(s)
-char *s;
+struct symtab *symlook(char const *s)
 {
 	char *p;
 	struct symtab *sp;
@@ -160,3 +185,4 @@ char *s;
 	yyerror("Too many symbols");
 	exit(1);	/* cannot continue */
 } /* symlook */
+

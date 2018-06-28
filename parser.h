@@ -5,6 +5,7 @@ struct symtab
     char *name;
     char *stringVal;
     double doubleVal;
+    int isDeclared;
 } symtab[NSYMS];
 
 struct symtab *symlook();
