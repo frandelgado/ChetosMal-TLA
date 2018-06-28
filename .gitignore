@@ -1,0 +1,5 @@
+*.c
+*.o
+*.gch
+dankcompiler
+y.tab.h
