@@ -2,12 +2,14 @@
 
 enum var_type_t { UNDEF, NUMBER, STRING };
 
+enum op_t { GREATER, GREATER_EQ, LESSER, LESSER_EQ, EQUALS, NOT_EQ };
+
 struct symtab
 {
     char *name;
-    char *stringVal;
-    double doubleVal;
-    int isDeclared;
+    char *str;
+    var_type_t var_type;
+    int isDeclared; //???
 } symtab[NSYMS];
 
 struct value{
