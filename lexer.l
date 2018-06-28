@@ -8,7 +8,7 @@ extern int lineno;
 
 ws        [ \t]+
 comment   #.*
-var       (\"[^\"\n]*[\"\n])|(([0-9]+)|(0-9)*\.[0-9]+)
+value       (\"[^\"\n]*[\"\n])|(([0-9]+)|(0-9)*\.[0-9]+)
 id        [a-zA-Z][a-zA-Z0-9]*
 nl        \n
 
@@ -16,7 +16,7 @@ nl        \n
 
 {ws}      ;
 {comment} ;
-{var} { 
+{value} { 
     
     if(yytext[0] == '"'){
         yylval.string = strdup(yytext+1); /* skip open quote */
@@ -42,7 +42,6 @@ division        { return DIV; }
 while_end       { return CLOSE_LOOP; }
 assignment      { return ASSIGN; }
 end_line        { return END_LINE; }
-end             { return END; }
 {id}            { yylval.symp = symlook(yytext);
                   return ID;
                 }

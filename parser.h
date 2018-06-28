@@ -8,4 +8,8 @@ struct symtab
     int isDeclared;
 } symtab[NSYMS];
 
+struct variable{
+    int vartype;l
+} vp;
+
 struct symtab *symlook();

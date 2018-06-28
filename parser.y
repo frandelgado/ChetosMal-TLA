@@ -26,48 +26,69 @@ FILE *yyout;
 %token <symp> ID
 %token <number> NUMBER 
 %token <cmd> OPEN_LOOP CLOSE_LOOP SUM SUB MUL DIV VAR
-%token <cmd> ASSIGN END GREATER LESSER END_LINE 
+%token <cmd> ASSIGN GREATER LESSER IF END_LINE 
 %type <number> operation statement
+%type <variable> value
 
-%start file
+%start statements
 
 %%
 
-file: 	  file statement
-		| statement
-		;
+statements: 			statements statement
+					| 	statement
+					;
 
-statement:    VAR ID ASSIGN STRING END_LINE { fprintf(yyout, "char* %s = \"%s\";\n", $2->name, $4);
-											  $2->stringVal = $4;
-											  symDeclare($2->name);
-											}
-            | VAR ID ASSIGN operation END_LINE	{ fprintf(yyout, "double %s = %f;\n", $2->name, $4);
-												  $2->doubleVal = $4;
-												  symDeclare($2->name);
-											  	}
-            | ID ASSIGN STRING END_LINE { symIsDeclared($1->name);
-										  fprintf(yyout, "%s = \"%s\";\n", $1->name, $3); 
-										}
-            | ID ASSIGN operation END_LINE 	{	symIsDeclared($1->name);
-												fprintf(yyout, "%s = %f;\n", $1->name, $3); 
-											}
+
+
+statement:   
+			  VAR ID END_LINE
+			| VAR ID ASSIGN value END_LINE 
+            | ID ASSIGN value END_LINE 
+			| PRINT value END_LINE
+			| IF condition THEN statements END_IF
+			| IF condition THEN statements ELSE statements END_IF
+			| WHILE condition DO statements END_WHILE
 			;
 
+value: 	  STRING
+		| NUMBER
+		| operation
+		| ID
+		;
 
-operation:    operation SUM operation { $$ = $1 + $3; }
-            | operation SUB operation { $$ = $1 + $3; }
-            | operation MUL operation { $$ = $1 * $3; }
-            | operation DIV operation {
+		
+condition: 	  NOT condition 
+			| PARENTHESIS_OPENED condition logic_op condition PARENTHESIS_CLOSED
+			| bool_exp
+			;
+
+bool_exp: value comparation value 		{$$->str = writeBool($1, $2->operand, $3); };
+
+comparation:  GREATER 		{ $$->operand = GREATER }
+			| LESSER  		{ $$->operand = LESSER }
+			| LESSER_EQ 	{ $$->operand = LESSER_EQ }
+			| GREATER_EQ 	{ $$->operand = GREATER_EQ }
+			| EQUALS 		{ $$->operand = EQUALS }
+			| NOT_EQUALS	{ $$->operand = NOT_EQUALS }
+			;
+
+logic_op: 	  AND		{ $$->str = "&&" } 
+			| OR 		{ $$->str = "||" }
+			;
+
+operation:    value SUM value { $$ = $1 + $3; }
+            | value SUB value { $$ = $1 + $3; }
+            | value MUL value { $$ = $1 * $3; }
+            | value DIV value {
                                         if($3 == 0.0)
                                             yyerror("Attempt to divde by zero");
                                         else
                                             $$ = $1 / $3;
                                      }
-            | NUMBER
+            | value MOD value { }
             ;
 %%
 
-char *progname = "mgl";
 int lineno = 1;
 
 #define DEFAULT_OUTFILE "out.c"
@@ -120,8 +141,9 @@ void main(int argc, char **argv)
     
 	/* normal interaction on yyin and 
 	   yyout from now on */
-    
+    fprintf(yyout, "int asd(){\n");
 	yyparse();
+	fprintf(yyout, "\n}");
     
 	/* now check EOF condition */
 	if(!parsing_done) /* in the middle of a screen */
@@ -162,6 +184,7 @@ void symIsDeclared(char const *s)
 				return;
 	}
 	yyerror("Variable is not declared");
+	exit(1);
 }
 
 /* look up a symbol table entry, add if not present */
