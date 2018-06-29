@@ -1,14 +1,14 @@
-var             pls
-if              can_u_do_dis
-then            gr8
-else            okno
+var             PLS
+if              CANUDODIS
+then            GR8
+else            OKNO
 end_if
-while           loopdaloop
-do              oknow
+while           LOOPDALOOP
+do              OKNOW
 end_while
-not             nyet
-and             also
-or              maybe
+not             NYET
+and             ALSO
+or              MAYBE
 eq
 not_eq
 greater
@@ -21,7 +21,7 @@ mul             *
 div             /
 mod             %
 assign
-end_line        
+end_line
 par_open        (
 par_close       )
-print           i_made_dis
+print           IMADEDIS
