@@ -25,3 +25,57 @@ end_line
 par_open        (
 par_close       )
 print           IMADEDIS
+
+ESTE:		Declaraci\'on din\'amica de variables
+
+CAMISAKI:		If
+
+PANTALOCITO:	Then
+
+QUECORTECITO:	Else
+
+ANIANIAY:		Endif
+
+MIENTRAS:			While loop
+
+VOSSEGUIME:				Comienzo del bloque loop
+
+GRACIASPERRO:		Final del loop
+
+NIAPALOS:			Negaci\'on l\'ogica ( ! en C )
+
+I:			Operador l\'ogico and ( \&\& en C )
+
+O:				Operador l\'gico or ( || en C )
+
+IGUAL:				Operador de comparaci\'on igual ( == en C )
+
+NOIGUAL:			Operador de comparaci\'on distinto ( != en C )
+
+REALFA:		Operador de comparaci\'on mayor ( > en C )
+
+MASALFA:		Operador de comparaci\'on mayor o igual ( >= en C )
+
+REBETA:			Operador de comparaci\'on menor ( < en C )
+
+MENOSBETA:		Operador de comparaci\'on menor o igual ( <= en C )
+
++:				Operador de suma
+
+-:				Operador de resta
+
+*:				Operador de miltiplicaci\'on
+
+/:				Operador de divisi\'on
+
+\%:				Operador de m\'odulo
+
+SELADADE:		Asignaci\'on de variables ( = en C )
+
+XD:				Final de l\'inea ( ; en C )
+
+(:				Apertura de parant\'esis
+
+):				Cierre de parent\'esis
+
+PIPI:			Imprimir en entrada est\'andar ( printf en C )
