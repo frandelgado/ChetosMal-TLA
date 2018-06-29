@@ -7,7 +7,7 @@
 
 #define FLOAT_DEC_PTS "%.10f"
 
-int parsing_done = 1; 
+int parsing_done = 1;
 int yydebug = 1;
 FILE *yyout;
 char * progname;
@@ -37,11 +37,11 @@ char * writeBool(int parenthesis, struct value * v1, op_t operation, struct valu
 
 %token <string> STRING
 %token <symp> ID
-%token <string> NUMBER 
+%token <string> NUMBER
 %token <cmd> SUM SUB MUL DIV MOD VAR
 %token <cmd> ASSIGN GREATER GREATER_EQ LESSER LESSER_EQ EQUALS NOT_EQUALS
 %token <cmd> NOT AND OR
-%token <cmd> END_LINE PRINT
+%token <cmd> END_LINE PRINT APPENDCHAR
 %token <cmd> PARENTHESIS_OPENED PARENTHESIS_CLOSED
 %token <cmd> IF THEN ELSE END_IF WHILE DO END_WHILE
 %type <string> statements statement
@@ -61,8 +61,8 @@ statements:   statements statement { $$ = realloc($1, strlen($1) + strlen($2) + 
 			| statement { $$ = $1; }
 			;
 
-statement:   
-			  VAR ID END_LINE { 
+statement:
+			  VAR ID END_LINE {
 				  		if($2->isDeclared != UNDECLARED) {
 							yyerror("Variable already declared");
 							exit(1);
@@ -115,6 +115,7 @@ statement:
 									break;
 								case TYPE_STRING:
 									$1->var_type = TYPE_STRING;
+
 									sprintf($$, "__dank_getvar(\"%s\")->strValue = %s;\n", $1->name, $3->str);
 									break;
 								case TYPE_NUMBER:
@@ -141,6 +142,30 @@ statement:
 						}
 						//free($2->str);
 			}
+      | APPENDCHAR ID END_LINE {
+        if ($2->isDeclared != DECLARED) {
+          yyerror("Variable was never declared");
+          exit(1);
+        } else {
+          $$ = malloc(strlen($2->name)*6 + 256);
+          char * aux = malloc(strlen($2->name)*2 + 128);
+          switch($2->var_type) {
+            case TYPE_UNDEF:
+              yyerror("Attempt to use an undefined variable");
+              exit(1);
+              break;
+            case TYPE_STRING:
+              sprintf(aux, "__dank_getvar(\"%s\")->strValue[strlen(__dank_getvar(\"%s\")->strValue)]=getchar();", $2->name, $2->name);
+              sprintf($$, "__dank_getvar(\"%s\")->strValue = realloc(__dank_getvar(\"%s\")->strValue, strlen(__dank_getvar(\"%s\")->strValue) + 1);\n%s", $2->name, $2->name, $2->name, aux);
+              break;
+            case TYPE_NUMBER:
+              yyerror("Cant append to a number");
+              exit(1);
+              break;
+          }
+          free(aux);
+        }
+      };
 			| IF condition THEN statements END_IF {
 						$$ = malloc(strlen($2) + strlen($4) + 7); $$[0] = 0;
 						strcat($$, "if(");
@@ -206,8 +231,8 @@ value:	 	  STRING {$$ = malloc(sizeof(struct value)); $$->var_type = TYPE_STRING
 			}
 			;
 
-		
-condition: 	  NOT condition { 	$$ = malloc(strlen($2) + 4); $$[0] = 0; 
+
+condition: 	  NOT condition { 	$$ = malloc(strlen($2) + 4); $$[0] = 0;
 								strcat($$, "!("); strcat($$, $2); strcat($$, ")");
 								free($2); }
 			| PARENTHESIS_OPENED condition logic_op condition PARENTHESIS_CLOSED {//NO HACER FREE DE logic_op
@@ -222,6 +247,7 @@ condition: 	  NOT condition { 	$$ = malloc(strlen($2) + 4); $$[0] = 0;
 			| bool_exp 		{ $$ = $1; }
 			;
 
+
 bool_exp: 	  value comparation value 		{ $$ = writeBool(0, $1, $2, $3); }
       | PARENTHESIS_OPENED value comparation value PARENTHESIS_CLOSED { $$ = writeBool(1, $2, $3, $4); }
       ;
@@ -234,11 +260,11 @@ comparation:  GREATER 		{ $$ = OP_GREATER; }
 			| NOT_EQUALS	{ $$ = OP_NOT_EQ; }
 			;
 
-logic_op: 	  AND		{ $$ = " && "; } 
+logic_op: 	  AND		{ $$ = " && "; }
 			| OR 		{ $$ = " || "; }
 			;
 
-operation:    value SUM value { $$ = sum($1, $3); } 
+operation:    value SUM value { $$ = sum($1, $3); }
             | value SUB value { $$ = sub($1, $3); }
             | value MUL value { $$ = mul($1, $3); }
             | value DIV value { $$ = divi($1, $3); }
@@ -360,7 +386,7 @@ struct value * divi(struct value *v1, struct value *v2) {
 
 struct value * concat(struct value *v1, struct value *v2) {
 	struct value * out = malloc(sizeof(struct value));
-	
+
 	out->str = malloc(strlen(v1->str) + strlen(v2->str) + 35);
 
 	if(v1->var_type == TYPE_NUMBER) {
@@ -398,9 +424,9 @@ void main(int argc, char **argv)
 	char *outfile;
 	char *infile;
 	extern FILE *yyin, *yyout;
-    
+
 	progname = argv[0];
-    
+
 	if(argc > 3)
 	{
         	fprintf(stderr,usage, progname);
@@ -413,7 +439,7 @@ void main(int argc, char **argv)
 		yyin = fopen(infile,"r");
 		if(yyin == NULL) /* open failed */
 		{
-			fprintf(stderr,"%s: cannot open %s\n", 
+			fprintf(stderr,"%s: cannot open %s\n",
 				progname, infile);
 			exit(1);
 		}
@@ -427,16 +453,16 @@ void main(int argc, char **argv)
 	{
       		outfile = DEFAULT_OUTFILE;
 	}
-    
+
 	yyout = fopen(outfile,"w");
 	if(yyout == NULL) /* open failed */
 	{
-      		fprintf(stderr,"%s: cannot open %s\n", 
+      		fprintf(stderr,"%s: cannot open %s\n",
                 	progname, outfile);
 		exit(1);
 	}
-    
-	/* normal interaction on yyin and 
+
+	/* normal interaction on yyin and
 	   yyout from now on */
 	fputs(header, yyout);
 	yyparse();
@@ -465,7 +491,7 @@ void yyerror (char const *s) {
  }
 
 void symDeclare(char const *s)
-{	
+{
 	struct symtab *sp;
 	for(sp = symtab; sp < &symtab[NSYMS]; sp++) {
 		if(sp->name && !strcmp(sp->name, s))
@@ -473,7 +499,7 @@ void symDeclare(char const *s)
 	}
 }
 void symIsDeclared(char const *s)
-{	
+{
 	struct symtab *sp;
 	for(sp = symtab; sp < &symtab[NSYMS]; sp++) {
 		if(sp->name && !strcmp(sp->name, s))
@@ -489,12 +515,12 @@ struct symtab *symlook(char const *s)
 {
 	char *p;
 	struct symtab *sp;
-	
+
 	for(sp = symtab; sp < &symtab[NSYMS]; sp++) {
 		/* is it already here? */
 		if(sp->name && !strcmp(sp->name, s))
 			return sp;
-		
+
 		/* is it free */
 		if(!sp->name) {
 			sp->name = strdup(s);
@@ -507,5 +533,3 @@ struct symtab *symlook(char const *s)
 	yyerror("Too many symbols");
 	exit(1);	/* cannot continue */
 } /* symlook */
-
-

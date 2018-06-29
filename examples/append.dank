@@ -1,0 +1,4 @@
+var streng end_line
+streng assign "hola" add "holis" end_line
+append_a_char streng end_line
+print streng end_line

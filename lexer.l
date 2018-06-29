@@ -59,6 +59,7 @@ end_line        { return END_LINE; }
 par_open        { return PARENTHESIS_OPENED; }
 par_close       { return PARENTHESIS_CLOSED; }
 print           { return PRINT; }
+append_a_char   { return APPENDCHAR; }
 {id}            { yylval.symp = symlook(yytext);
                   return ID;
                 }
