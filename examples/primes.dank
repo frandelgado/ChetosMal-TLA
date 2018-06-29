@@ -1,21 +1,21 @@
-var i assign 0 end_line
-var j assign 0 end_line
+ESTE i SELADADE 0 XD
+ESTE j SELADADE 0 XD
 
-while i lesser 100 do
-  j assign 2 end_line
-  var flag assign 0 end_line
-  var l assign i div 2 end_line
+MIENTRAS i REBETA 100 VOSSEGUIME
+  j SELADADE 2 XD
+  ESTE flag SELADADE 0 XD
+  ESTE l SELADADE i / 2 XD
 
-  while par_open par_open j lesser l par_close and flag eq 0 par_close do
-    if i mod j eq 0
-    then
-      flag assign 1 end_line
-    end_if
-    j assign j add 1 end_line
-  end_while
+  MIENTRAS ( ( j REBETA l ) I flag IGUAL 0 ) VOSSEGUIME
+    CAMISAKI i % j IGUAL 0
+    PANTALOCITO
+      flag SELADADE 1 XD
+    ANIANIAY
+    j SELADADE j + 1 XD
+  GRACIASPERRO
 
-  if flag eq 0 then
-    print i end_line
-  end_if
-  i assign i add 1 end_line
-end_while
+  CAMISAKI flag IGUAL 0 PANTALOCITO
+    PIPI i XD
+  ANIANIAY
+  i SELADADE i + 1 XD
+GRACIASPERRO
