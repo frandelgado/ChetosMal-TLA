@@ -86,7 +86,7 @@ statement:
 									sprintf(assig, "__dank_getvar(\"%s\")->strValue = %s;\n", $2->name, $4->str);
 									break;
 								case TYPE_NUMBER:
-									$2->var_type = TYPE_STRING;
+									$2->var_type = TYPE_NUMBER;
 									sprintf(assig, "__dank_getvar(\"%s\")->numValue = %s;\n", $2->name, $4->str);
 									break;
 							}
