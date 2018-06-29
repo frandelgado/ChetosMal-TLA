@@ -1,0 +1,17 @@
+var x end_line
+
+x assign 10 end_line
+
+print "X vale " add x end_line
+
+x assign x add 30 end_line
+
+print "X + 30 = " add x end_line
+
+x assign "holis" end_line
+
+print "X ahora es un string y vale: " add x end_line
+
+x assign x add 123 end_line
+
+print "X + 123 = " add x end_line
