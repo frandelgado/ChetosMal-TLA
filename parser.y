@@ -161,6 +161,8 @@ statement:
 
 value:	 	  STRING {$$->var_type = TYPE_STRING; $$->str = $1;}
 			| NUMBER {$$->var_type = TYPE_NUMBER; $$->str = $1;}
+value:	 	  STRING {$$->var_type = TYPE_STRING; $$->str = strdup($1);}
+			| NUMBER {$$->var_type = TYPE_NUMBER; $$->str = strdup($1);}
 			| operation {$$->var_type = $1->var_type; $$->str = $1->str;}
 			| ID {
 						$$->str = malloc(strlen($1->name) + 33);
