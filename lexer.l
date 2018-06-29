@@ -16,15 +16,15 @@ nl        \n
 
 {ws}      ;
 {comment} ;
-{value} { 
-    
+{value} {
+
     if(yytext[0] == '"'){
         yylval.string = strdup(yytext+1); /* skip open quote */
         if(yylval.string[yyleng-2] != '"')
 	        warning("Unterminated character string",(char *)0);
 	    else
 	        yylval.string[yyleng-2] = '\0'; /* remove close quote */
-            return STRING; 
+            return STRING;
     }
     else{
         yylval.number = strdup(yytext);
@@ -44,6 +44,7 @@ assignment      { return ASSIGN; }
 end_line        { return END_LINE; }
 par_open        { return PARENTHESIS_OPENED; }
 par_close       { return PARENTHESIS_CLOSED; }
+printf          { return PRINT; }
 {id}            { yylval.symp = symlook(yytext);
                   return ID;
                 }
