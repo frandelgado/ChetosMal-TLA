@@ -26,6 +26,6 @@ struct value{
 struct symtab *symlook();
 
 void warning(char *s, char *t);
-
+int yywrap();
 
 #endif

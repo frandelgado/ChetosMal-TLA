@@ -392,7 +392,6 @@ int lineno = 1;
 
 char *usage = "%s: usage [infile] [outfile]\n";
 
-
 void main(int argc, char **argv)
 {
 	char *outfile;
@@ -463,6 +462,10 @@ void warning(char *s, char *t) /* print warning message */
 void yyerror (char const *s) {
    fprintf (stderr, "%s\n", s);
  }
+
+int yywrap() {
+	return 1;
+}
 
 void symDeclare(char const *s)
 {	
