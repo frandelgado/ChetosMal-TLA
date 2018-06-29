@@ -1,2 +1,8 @@
-var streng assignment "pepapot\n" end_line
-print streng end_line
+var streng assign "pepapot" end_line
+var strong assign "pipopet" end_line
+print streng add strong add "swiggityswooty" add 5 end_line
+
+
+print "asdf %s sdfsdf" end_line
+print 5 add 89 add 2 end_line
+print 5 add 8 add 2 add "holis" end_line

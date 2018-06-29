@@ -25,7 +25,10 @@ nl        \n
         return STRING;
     }
     else{
-        yylval.string = strdup(yytext);
+        yylval.string = malloc(strlen(yytext) + 2);
+        strcpy(yylval.string, yytext);
+        if(strstr(".", yytext) == NULL)
+            strcat(yylval.string, ".");
         return NUMBER;
     }
     }

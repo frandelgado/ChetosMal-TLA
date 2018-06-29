@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]
+then
+  echo "Asi no se usa pipi. dank src.dank [output] (output es opcional, default es src)"
+else
+  dankcompiler $1 out.c
+  if [ $# -eq 2 ]
+  then
+    gcc -o $PWD/$2 out.c hashmap.o
+  else
+    OUTPUT=$(echo $1 | cut -d'.' -f 1)
+    gcc -o $PWD/$OUTPUT out.c hashmap.o
+  fi
+  rm out.c
+fi

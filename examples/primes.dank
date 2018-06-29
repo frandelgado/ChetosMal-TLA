@@ -1,0 +1,21 @@
+var i assign 0 end_line
+var j assign 0 end_line
+
+while i lesser 100 do
+  j assign 2 end_line
+  var flag assign 0 end_line
+  var l assign i div 2 end_line
+
+  while par_open par_open j lesser l par_close and flag eq 0 par_close do
+    if i mod j eq 0
+    then
+      flag assign 1 end_line
+    end_if
+    j assign j add 1 end_line
+  end_while
+
+  if flag eq 0 then
+    print i end_line
+  end_if
+  i assign i add 1 end_line
+end_while

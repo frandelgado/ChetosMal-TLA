@@ -23,7 +23,7 @@ struct value * sub(struct value *v1, struct value *v2);
 struct value * mul(struct value *v1, struct value *v2);
 struct value * divi(struct value *v1, struct value *v2);
 struct value * mod(struct value *v1, struct value *v2);
-char * writeBool(struct value * v1, op_t operation, struct value * v2);
+char * writeBool(int parenthesis, struct value * v1, op_t operation, struct value * v2);
 
 %}
 
@@ -53,8 +53,8 @@ char * writeBool(struct value * v1, op_t operation, struct value * v2);
 
 %%
 
-file: 		  file statement { fprintf(yyout, $2); /*free($2);*/ }
-			| statement { fprintf(yyout, $1); /*free($1);*/ }
+file: 		  file statement { fputs($2, yyout); }
+          | statement { fputs($1, yyout); }
 			;
 
 statements:   statements statement { $$ = realloc($1, strlen($1) + strlen($2) + 1); strcat($$, $2); free($2); }
@@ -78,7 +78,7 @@ statement:
 							exit(1);
 						} else {
 							$2->isDeclared = DECLARED;
-							char * def = malloc(strlen($2->name) + 18);
+							char * def = malloc(strlen($2->name) + 40);
 							sprintf(def, "__dank_define(\"%s\");\n", $2->name);
 							char * assig = malloc(strlen($2->name) + strlen($4->str) + 40);
 							switch($4->var_type) {
@@ -133,10 +133,10 @@ statement:
 								exit(1);
 								break;
 							case TYPE_STRING:
-								sprintf($$, "printf(\"%s\", %s);\n", "%%s\\n", $2->str);
+								sprintf($$, "printf(\"%s\", %s);\n", "%s\\n", $2->str);
 								break;
 							case TYPE_NUMBER:
-								sprintf($$, "printf(\"%s\", %s);\n", "%%g\\n", $2->str);
+								sprintf($$, "printf(\"%s\", %s);\n", "%g\\n", $2->str);
 								break;
 						}
 						//free($2->str);
@@ -175,6 +175,16 @@ statement:
 
 value:	 	  STRING {$$ = malloc(sizeof(struct value)); $$->var_type = TYPE_STRING; $$->str = strdup($1);}
 			| NUMBER {$$ = malloc(sizeof(struct value)); $$->var_type = TYPE_NUMBER; $$->str = strdup($1);}
+      | PARENTHESIS_OPENED value PARENTHESIS_CLOSED {
+            $$ = malloc(sizeof(struct value));
+            $$->var_type = $2->var_type;
+            $$->str = malloc(strlen($2->str) + 3);
+            strcpy($$->str, "(");
+            strcat($$->str, $2->str);
+            strcat($$->str, ")");
+            free($2->str);
+            free($2);
+          }
 			| operation {$$ = $1; }
 			| ID {
 						$$ = malloc(sizeof(struct value));
@@ -212,7 +222,9 @@ condition: 	  NOT condition { 	$$ = malloc(strlen($2) + 4); $$[0] = 0;
 			| bool_exp 		{ $$ = $1; }
 			;
 
-bool_exp: 	  value comparation value 		{ $$ = writeBool($1, $2, $3); };
+bool_exp: 	  value comparation value 		{ $$ = writeBool(0, $1, $2, $3); }
+      | PARENTHESIS_OPENED value comparation value PARENTHESIS_CLOSED { $$ = writeBool(1, $2, $3, $4); }
+      ;
 
 comparation:  GREATER 		{ $$ = OP_GREATER; }
 			| LESSER  		{ $$ = OP_LESSER; }
@@ -235,7 +247,7 @@ operation:    value SUM value { $$ = sum($1, $3); }
 %%
 
 
-char * writeBool(struct value * v1, op_t operation, struct value * v2) {
+char * writeBool(int parenthesis, struct value * v1, op_t operation, struct value * v2) {
 	char * out;
 	char * op_str;
 	switch(operation) {
@@ -262,17 +274,27 @@ char * writeBool(struct value * v1, op_t operation, struct value * v2) {
 		yyerror("Attempt to compare number with string");
 		exit(1);
 	} else if (v1->var_type == TYPE_STRING) {
-		out = malloc(strlen(v1->str) + strlen(v2->str) + 21);
-		sprintf(out, " strcmp(%s, %s) %s 0 ", v1->str, v2->str, op_str);
+    if(parenthesis){
+      out = malloc(strlen(v1->str) + strlen(v2->str) + 24);
+  		sprintf(out, " (strcmp(%s, %s) %s 0) ", v1->str, v2->str, op_str);
+    } else {
+      out = malloc(strlen(v1->str) + strlen(v2->str) + 21);
+  		sprintf(out, " strcmp(%s, %s) %s 0 ", v1->str, v2->str, op_str);
+    }
 	} else {
-		out = malloc(strlen(v1->str) + strlen(v2->str) + 21);
-		sprintf(out, " %s %s %s ", v1->str, op_str, v2->str);
+    if(parenthesis){
+      out = malloc(strlen(v1->str) + strlen(v2->str) + 24);
+      sprintf(out, " (%s %s %s) ", v1->str, op_str, v2->str);
+    } else{
+		    out = malloc(strlen(v1->str) + strlen(v2->str) + 21);
+		    sprintf(out, " %s %s %s ", v1->str, op_str, v2->str);
+    }
 	}
 	return out;
 }
 
 struct value * sum(struct value *v1, struct value *v2) {
-	
+
 	if(v1->var_type == TYPE_UNDEF || v2->var_type == TYPE_UNDEF) {
 		yyerror("Attempt to use an undefined variable");
 		exit(1);
@@ -305,7 +327,19 @@ struct value * mul(struct value *v1, struct value *v2) {
 
 struct value * mod(struct value *v1, struct value *v2) {
 	if(v1->var_type == TYPE_NUMBER && v2->var_type == TYPE_NUMBER) {
-		return operate(v1, v2, "%");
+    struct value * out = malloc(sizeof(struct value));
+    out->str = malloc(strlen(v1->str) + 256 + strlen(v2->str) + 1);
+    strcpy(out->str, "__dank_dtoi(");
+    strcat(out->str, v1->str);
+    strcat(out->str, ")%__dank_dtoi(");
+    strcat(out->str, v2->str);
+    strcat(out->str, ")");
+    free(v1->str);
+    free(v1);
+    free(v2->str);
+    free(v2);
+    out->var_type = TYPE_NUMBER;
+    return out;
 	} else {
 		yyerror("Can't modulo strings");
 		exit(1);

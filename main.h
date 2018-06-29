@@ -27,6 +27,10 @@ char * __dank_dtoa(double val) {\n\
     sprintf(str, \"%%g\", val);\n\
     return str;\n\
 }\n\
+int __dank_dtoi(double val) {\n\
+  int value = val;\n\
+  return value;\n\
+}\n\
 char * __dank_concat(char * str1, char * str2) {\n\
     char * out = malloc(strlen(str1) + strlen(str2) + 1);\n\
     strcpy(out, str1);\n\
