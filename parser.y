@@ -264,6 +264,7 @@ struct value * sum(struct value *v1, struct value *v2) {
 	if(v1->var_type == TYPE_UNDEF || v2->var_type == TYPE_UNDEF)
 		yyerror("Attempt to use an undefined variable");
 	if(v1->var_type == TYPE_NUMBER && v2->var_type == TYPE_NUMBER) {
+		free(out);
 		return operate(v1, v2, "+");
 	} else {
 		out->str = concat(v1->str, v2->str);
@@ -320,6 +321,7 @@ char * concat(char *str1, char *str2)
 struct value * operate(struct value *v1, struct value *v2, char *op) {
 	struct value * out = malloc(sizeof(struct value));
 	out->str = realloc(v1->str, strlen(v1->str) + strlen(v2->str) + strlen(op) + 1);
+	out->var_type = TYPE_NUMBER;
 	strcat(out->str, op);
 	strcat(out->str, v2->str);
 	free(v2->str);
