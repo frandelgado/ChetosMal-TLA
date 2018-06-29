@@ -1,0 +1,3 @@
+if par_open par_open 4 eq par_open 3 add 1 par_close par_close and par_open "pepe" eq "pepe" par_close par_close then
+  print 1 end_line
+end_if
