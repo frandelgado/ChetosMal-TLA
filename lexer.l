@@ -34,7 +34,7 @@ nl        \n
     }
 ESTE            { return VAR; }
 CAMISAKI        { return IF; }
-PANTALOCITO     { return THEN; }
+PANTALONCITO     { return THEN; }
 QUECORTECITO    { return ELSE; }
 ANIANIAY        { return END_IF; }
 MIENTRAS        { return WHILE; }

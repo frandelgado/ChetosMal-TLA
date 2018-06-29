@@ -1,17 +1,17 @@
-var x end_line
+ESTE x XD
 
-x assign 10 end_line
+x SELADADE 10 XD
 
-print "X vale " add x end_line
+PIPI "X vale " + x XD
 
-x assign x add 30 end_line
+x SELADADE x + 30 XD
 
-print "X + 30 = " add x end_line
+PIPI "X + 30 = " + x XD
 
-x assign "holis" end_line
+x SELADADE "holis" XD
 
-print "X ahora es un string y vale: " add x end_line
+PIPI "X ahora es un string y vale: " + x XD
 
-x assign x add 123 end_line
+x SELADADE x + 123 XD
 
-print "X + 123 = " add x end_line
+PIPI "X + 123 = " + x XD

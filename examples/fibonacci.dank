@@ -1,17 +1,17 @@
-var n assign 15 end_line
-var first assign 0 end_line
-var second assign 1 end_line
-var c assign 0 end_line
-var next end_line
+ESTE n SELADADE 15 XD
+ESTE first SELADADE 0 XD
+ESTE second SELADADE 1 XD
+ESTE c SELADADE 0 XD
+ESTE next XD
 
-while c lesser n do
-    c assign c add 1 end_line
-    if c lesser_eq 1 then
-        next assign c end_line
-    else
-        next assign first add second end_line
-        first assign second end_line
-        second assign next end_line
-    end_if
-    print next end_line
-end_while
+MIENTRAS c REBETA n VOSSEGUIME
+    c SELADADE c + 1 XD
+    CAMISAKI c MENOSBETA 1 PANTALONCITO
+        next SELADADE c XD
+    QUECORTECITO
+        next SELADADE first + second XD
+        first SELADADE second XD
+        second SELADADE next XD
+    ANIANIAY
+    PIPI next XD
+GRACIASPERRO
