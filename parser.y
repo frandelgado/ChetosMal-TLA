@@ -149,38 +149,63 @@ operation:    value SUM value { $$ = sum($1, $3); }
 
 struct value * sum(struct value *v1, struct value *v2) {
 	struct value * out = malloc(sizeof(struct value));
+	
+	if(v1->var_type == UNDEF || v2->var_type == UNDEF)
+		yyerror(vi->name + " is undefined");
 	if(v1->var_type == NUMBER && v2->var_type == NUMBER) {
-		out->str = realloc(v1->str, strlen(v1->str) + strlen(v2->str) + 2);
-		strcat(out->str, "+");
-		strcat(out->str, v2->str);
-		free(v2->str);
-		free(v2);
+		return operate(v1, v2, "+")
 	} else {
-		//to string todo
+		
+		out->str = concat(v1->str, v2->str);
+		out->var_type = STRING;
+		return out;
 		//"1 + num1" SUM "\"hola\"" -> "strcat(itoa(1 + num1),\"hola\")"
 	}
 	return out;
 }
 
+
 struct value * sub(struct value *v1, struct value *v2) {
-	operate(v1, v2, "-", "Can't substract strings") {
+	if(v1->var_type == NUMBER && v2->var_type == NUMBER) {
+	return operate(v1, v2, "-");
+	} else {
+		yyerror("Can't substract strings");
+	}
 }
 
-/*if($3 == 0.0)
-	yyerror("Attempt to divde by zero");
-else*/
-
-struct value * operate(struct value *v1, struct value *v2, char *op, char* error_msg) {
-	struct value * out = malloc(sizeof(struct value));
+struct value * mul(struct value *v1, struct value *v2) {
 	if(v1->var_type == NUMBER && v2->var_type == NUMBER) {
-		out->str = realloc(v1->str, strlen(v1->str) + strlen(v2->str) + strlen(op) + 1);
-		strcat(out->str, op);
-		strcat(out->str, v2->str);
-		free(v2->str);
-		free(v2);
+	return operate(v1, v2, "*");
 	} else {
-		yyerror(error_msg);
+		yyerror("Can't multiply strings");
 	}
+}
+
+struct value * div(struct value *v1, struct value *v2) {
+	/*if($3 == 0.0)
+	yyerror("Attempt to divde by zero");
+	else*/
+	if(v1->var_type == NUMBER && v2->var_type == NUMBER) {
+	return operate(v1, v2, "/");
+	} else {
+		yyerror("Can't divide strings");
+	}
+}
+
+char * concat(char *str1, char *str2)
+{
+	char *concatStr = realloc(str1, strlen(str1) + strlen(str2) + 1);
+	strcat(retStr, str2);
+	return concatStr;
+}
+
+struct value * operate(struct value *v1, struct value *v2, char *op) {
+	struct value * out = malloc(sizeof(struct value));
+	out->str = realloc(v1->str, strlen(v1->str) + strlen(v2->str) + strlen(op) + 1);
+	strcat(out->str, op);
+	strcat(out->str, v2->str);
+	free(v2->str);
+	free(v2);
 	return out;
 }
 
