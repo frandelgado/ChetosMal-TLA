@@ -22,6 +22,17 @@ var_t * __dank_getvar(char * varname) {\n\
     hashmap_get(var_map, varname, (void**)&var);\n\
     return var;\n\
 }\n\
+char * __dank_dtoa(double val) {\n\
+    char * str = malloc(128);\n\
+    sprintf(str, \"%%g\", val);\n\
+    return str;\n\
+}\n\
+char * __dank_concat(char * str1, char * str2) {\n\
+    char * out = malloc(strlen(str1) + strlen(str2) + 1);\n\
+    strcpy(out, str1);\n\
+    strcat(out, str2);\n\
+    return out;\n\
+}\n\
 int main(){\n\
     var_map = hashmap_new();\n";
 

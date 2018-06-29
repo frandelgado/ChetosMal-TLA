@@ -19,12 +19,10 @@ nl        \n
 {value} {
 
     if(yytext[0] == '"'){
-        yylval.string = strdup(yytext+1); /* skip open quote */
-        if(yylval.string[yyleng-2] != '"')
+        yylval.string = strdup(yytext);
+        if(yylval.string[yyleng-1] != '"')
 	        warning("Unterminated character string",(char *)0);
-	    else
-	        yylval.string[yyleng-2] = '\0'; /* remove close quote */
-            return STRING;
+        return STRING;
     }
     else{
         yylval.string = strdup(yytext);

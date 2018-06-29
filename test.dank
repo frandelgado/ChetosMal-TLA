@@ -8,7 +8,7 @@ end_if
 while num2 greater 0 do
     num2 assign num2 sub 1 end_line
 end_while
-if ( num2 eq 0 and not num1 eq 2 ) then
+if par_open num2 eq 0 and not num1 eq 2 par_close then
     num1 assign 13 end_line
 end_if 
    

@@ -16,7 +16,7 @@ void warning(char *s, char *t);
 void yyerror (char const *s);
 void symIsDeclared(char const *s);
 void symDeclare(char const *s);
-char * concat(char *str1, char *str2);
+struct value * concat(struct value *v1, struct value *v2);
 struct value * operate(struct value *v1, struct value *v2, char *op);
 struct value * sum(struct value *v1, struct value *v2);
 struct value * sub(struct value *v1, struct value *v2);
@@ -116,7 +116,6 @@ statement:
 			}
 			| PRINT value END_LINE {
 						$$ = malloc(strlen($2->str) + 25);
-						printf("%s", $2->str);
 						switch($2->var_type) {
 							case TYPE_UNDEF:
 								yyerror("Attempt to use an undefined variable");
@@ -259,20 +258,16 @@ char * writeBool(struct value * v1, op_t operation, struct value * v2) {
 }
 
 struct value * sum(struct value *v1, struct value *v2) {
-	struct value * out = malloc(sizeof(struct value));
 	
-	if(v1->var_type == TYPE_UNDEF || v2->var_type == TYPE_UNDEF)
+	if(v1->var_type == TYPE_UNDEF || v2->var_type == TYPE_UNDEF) {
 		yyerror("Attempt to use an undefined variable");
+		exit(1);
+	}
 	if(v1->var_type == TYPE_NUMBER && v2->var_type == TYPE_NUMBER) {
-		free(out);
 		return operate(v1, v2, "+");
 	} else {
-		out->str = concat(v1->str, v2->str);
-		out->var_type = TYPE_STRING;
-		return out;
-		//"1 + num1" SUM "\"hola\"" -> "strcat(itoa(1 + num1),\"hola\")"
+		return concat(v1, v2);
 	}
-	return out;
 }
 
 
@@ -311,11 +306,21 @@ struct value * divi(struct value *v1, struct value *v2) {
 	}
 }
 
-char * concat(char *str1, char *str2)
-{
-	char *concatStr = realloc(str1, strlen(str1) + strlen(str2) + 1);
-	strcat(concatStr, str2);
-	return concatStr;
+struct value * concat(struct value *v1, struct value *v2) {
+	struct value * out = malloc(sizeof(struct value));
+	
+	out->str = malloc(strlen(v1->str) + strlen(v2->str) + 35);
+
+	if(v1->var_type == TYPE_NUMBER) {
+		sprintf(out->str, "__dank_concat(__dank_dtoa(%s),%s)", v1->str, v2->str);
+	} else if (v2->var_type == TYPE_NUMBER){
+		sprintf(out->str, "__dank_concat(%s,__dank_dtoa(%s))", v1->str, v2->str);
+	} else {
+		sprintf(out->str, "__dank_concat(%s,%s)", v1->str, v2->str);
+	}
+
+	out->var_type = TYPE_STRING;
+	return out;
 }
 
 struct value * operate(struct value *v1, struct value *v2, char *op) {
