@@ -53,8 +53,8 @@ char * writeBool(struct value * v1, op_t operation, struct value * v2);
 
 %%
 
-file: 		  file statement { fprintf(yyout, $2); free($2); }
-			| statement { fprintf(yyout, $1); free($1); }
+file: 		  file statement { fprintf(yyout, $2); /*free($2);*/ }
+			| statement { fprintf(yyout, $1); /*free($1);*/ }
 			;
 
 statements:   statements statement { $$ = realloc($1, strlen($1) + strlen($2) + 1); strcat($$, $2); free($2); }
@@ -110,7 +110,7 @@ statement:
 								sprintf($$, "__dank_getvar(\"%s\")->numValue = %s;\n", $1->name, $3->str);
 								break;
 						}
-						free($3->str);
+						//free($3->str);
 			}
 			| PRINT value END_LINE {
 						$$ = malloc(strlen($2->str) + 19);
@@ -125,7 +125,7 @@ statement:
 								sprintf($$, "printf(\"%%g\n\", %s);\n", $2->str);
 								break;
 						}
-						free($2->str);
+						//free($2->str);
 			}
 			| IF condition THEN statements END_IF {
 						$$ = malloc(strlen($2) + strlen($4) + 7); $$[0] = 0;
