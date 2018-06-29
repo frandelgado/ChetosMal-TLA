@@ -1,0 +1,27 @@
+var             pls
+if              can_u_do_dis
+then            gr8
+else            okno
+end_if
+while           loopdaloop
+do              oknow
+end_while
+not             nyet
+and             also
+or              maybe
+eq
+not_eq
+greater
+greater_eq
+lesser
+lesser_eq
+add             +
+sub             -
+mul             *
+div             /
+mod             %
+assign
+end_line        
+par_open        (
+par_close       )
+print           i_made_dis
