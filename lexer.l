@@ -32,19 +32,32 @@ nl        \n
     }
     }
 var             { return VAR; }
-while_begin     { return OPEN_LOOP; }
+if              { return IF; }
+then            { return THEN; }
+else            { return ELSE; }
+end_if          { return END_IF; }
+while           { return WHILE; }
+do              { return DO; }
+end_while       { return END_WHILE; }
+not             { return NOT; }
+and             { return AND; }
+or              { return OR; }
+eq              { return EQUALS; }
+not_eq          { return NOT_EQUALS; }
 greater         { return GREATER; }
-smaller         { return LESSER; }
-addition        { return SUM; }
-substraction    { return SUB; }
-multiplication  { return MUL; }
-division        { return DIV; }
-while_end       { return CLOSE_LOOP; }
-assignment      { return ASSIGN; }
+greater_eq      { return GREATER_EQ; }
+lesser          { return LESSER; }
+lesser_eq       { return LESSER_EQ; }
+add             { return SUM; }
+sub             { return SUB; }
+mul             { return MUL; }
+div             { return DIV; }
+mod             { return MOD; }
+assign          { return ASSIGN; }
 end_line        { return END_LINE; }
 par_open        { return PARENTHESIS_OPENED; }
 par_close       { return PARENTHESIS_CLOSED; }
-printf          { return PRINT; }
+print           { return PRINT; }
 {id}            { yylval.symp = symlook(yytext);
                   return ID;
                 }

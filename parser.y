@@ -3,9 +3,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include "parser.h"
+#include "main.h"
 
 #define FLOAT_DEC_PTS "%.10f"
-    
+
 int parsing_done = 1; 
 int yydebug = 1;
 
@@ -21,16 +22,15 @@ FILE *yyout;
     double    number;          /* command value */
 	struct symtab *symp;
 	struct value *valuep;
-	op_t op;
+	enum op_t op;
 }
 
 %token <string> STRING
 %token <symp> ID
 %token <number> NUMBER 
-%token <cmd> OPEN_LOOP CLOSE_LOOP SUM SUB MUL DIV VAR
-%token <cmd> ASSIGN GREATER GREATER_EQ LESSER LESSER_EQ
+%token <cmd> SUM SUB MUL DIV MOD VAR
+%token <cmd> ASSIGN GREATER GREATER_EQ LESSER LESSER_EQ EQUALS NOT_EQUALS
 %token <cmd> NOT AND OR
-%token <cmd> SUM SUB MUL DIV MOD
 %token <cmd> END_LINE PRINT
 %token <cmd> PARENTHESIS_OPENED PARENTHESIS_CLOSED
 %token <cmd> IF THEN ELSE END_IF WHILE DO END_WHILE
@@ -52,10 +52,73 @@ statements:   statements statement { $$ = realloc($1, strlen($1) + strlen($2) + 
 			;
 
 statement:   
-			  VAR ID END_LINE {//Crear en el mapa de variables}
-			| VAR ID ASSIGN value END_LINE {}
-            | ID ASSIGN value END_LINE {}
-			| PRINT value END_LINE {}
+			  VAR ID END_LINE { 
+				  		if($2->var_type != UNDEF) {
+							yyerror("Variable already defined");
+						} else {
+							$$ = malloc(strlen($2->name) + 18); $$[0] = 0;
+							sprintf($$, "__dank_define(%s);\n", $2->name);
+						}
+			  }
+			| VAR ID ASSIGN value END_LINE {
+						if($2->var_type != UNDEF) {
+							yyerror("Variable already defined");
+						} else {
+							char * def = malloc(strlen($2->name) + 18);
+							sprintf(def, "__dank_define(\"%s\");\n", $2->name);
+							char * assig = malloc(strlen($2->name) + strlen($4->str) + 40);
+							switch($4->var_type) {
+								case UNDEF:
+									yyerror("Attempt to use an undefined variable");
+									break;
+								case STRING:
+									sprintf(assig, "__dank_getvar(\"%s\")->strValue = %s;\n", $2->name, $4->str);
+									$$->var_type = STRING;
+									break;
+								case NUMBER:
+									sprintf(assig, "__dank_getvar(\"%s\")->numValue = %s;\n", $2->name, $4->str);
+									$$->var_type = NUMBER;
+									break;
+							}
+							$$ = malloc(strlen(def) + strlen(assig) + 1);
+							sprintf($$, "%s%s", def, assig);
+							free(def);
+							free(assig);
+							free($4->str);
+						}
+			}
+            | ID ASSIGN value END_LINE {
+						$$ = malloc(strlen($1->name) + strlen($3->str) + 36);
+						switch($3->var_type) {
+							case UNDEF:
+								yyerror("Attempt to use an undefined variable");
+								break;
+							case STRING:
+								sprintf($$, "__dank_getvar(\"%s\")->strValue = %s;\n", $1->name, $3->str);
+								$$->var_type = STRING;
+								break;
+							case NUMBER:
+								sprintf($$, "__dank_getvar(\"%s\")->numValue = %s;\n", $1->name, $3->str);
+								$$->var_type = NUMBER;
+								break;
+						}
+						free($3->str);
+			}
+			| PRINT value END_LINE {
+						$$ = malloc(strlen($2->str) + 19);
+						switch($2->var_type) {
+							case UNDEF:
+								yyerror("Attempt to use an undefined variable");
+								break;
+							case STRING:
+								sprintf($$, "printf(\"%s\n\");\n", $2->str);
+								break;
+							case NUMBER:
+								sprintf($$, "printf(\"%g\n\");\n", $2->str);
+								break;
+						}
+						free($2->str);
+			}
 			| IF condition THEN statements END_IF {
 						$$ = malloc(strlen($2) + strlen($4) + 7); $$[0] = 0;
 						strcat($$, "if(");
@@ -92,19 +155,20 @@ value:	 	  STRING {$$->var_type = STRING; $$->str = $1;}
 			| NUMBER {$$->var_type = NUMBER; $$->str = $1;}
 			| operation {$$->var_type = $1->var_type; $$->str = $1->str;}
 			| ID {
-				switch($1->var_type) {
-					case UNDEF:
-						yyerror("Attempt to use an undefined variable");
-						break;
-					case STRING:
-						$$->var_type = $1->var_type;
-						$$->str = "mapa["$1->name"].strValue"; //OH NOES
-						break;
-					case NUMBER:
-						$$->var_type = $1->var_type;
-						$$->str = "mapa["$1->name"].numValue"; //OH NOES
-						break;
-				}
+						$$->str = malloc(strlen($1->name) + 33);
+						switch($1->var_type) {
+							case UNDEF:
+								yyerror("Attempt to use an undefined variable");
+								break;
+							case STRING:
+								sprintf($$->str, " __dank_getvar(\"%s\")->strValue ", $1->name);
+								$$->var_type = STRING;
+								break;
+							case NUMBER:
+								sprintf($$->str, " __dank_getvar(\"%s\")->numValue ", $1->name);
+								$$->var_type = NUMBER;
+								break;
+						}
 			}
 			;
 
@@ -153,9 +217,8 @@ struct value * sum(struct value *v1, struct value *v2) {
 	if(v1->var_type == UNDEF || v2->var_type == UNDEF)
 		yyerror(vi->name + " is undefined");
 	if(v1->var_type == NUMBER && v2->var_type == NUMBER) {
-		return operate(v1, v2, "+")
+		return operate(v1, v2, "+");
 	} else {
-		
 		out->str = concat(v1->str, v2->str);
 		out->var_type = STRING;
 		return out;
@@ -167,7 +230,7 @@ struct value * sum(struct value *v1, struct value *v2) {
 
 struct value * sub(struct value *v1, struct value *v2) {
 	if(v1->var_type == NUMBER && v2->var_type == NUMBER) {
-	return operate(v1, v2, "-");
+		return operate(v1, v2, "-");
 	} else {
 		yyerror("Can't substract strings");
 	}
@@ -175,9 +238,17 @@ struct value * sub(struct value *v1, struct value *v2) {
 
 struct value * mul(struct value *v1, struct value *v2) {
 	if(v1->var_type == NUMBER && v2->var_type == NUMBER) {
-	return operate(v1, v2, "*");
+		return operate(v1, v2, "*");
 	} else {
 		yyerror("Can't multiply strings");
+	}
+}
+
+struct value * mod(struct value *v1, struct value *v2) {
+	if(v1->var_type == NUMBER && v2->var_type == NUMBER) {
+		return operate(v1, v2, "%");
+	} else {
+		yyerror("Can't modulo strings");
 	}
 }
 
@@ -186,7 +257,7 @@ struct value * div(struct value *v1, struct value *v2) {
 	yyerror("Attempt to divde by zero");
 	else*/
 	if(v1->var_type == NUMBER && v2->var_type == NUMBER) {
-	return operate(v1, v2, "/");
+		return operate(v1, v2, "/");
 	} else {
 		yyerror("Can't divide strings");
 	}
@@ -261,22 +332,9 @@ void main(int argc, char **argv)
     
 	/* normal interaction on yyin and 
 	   yyout from now on */
-    fprintf(yyout, 
-	"#define KEY_MAX_LENGTH (256)
-#define KEY_PREFIX ("somekey")
-#define KEY_COUNT (1024*1024)
-
-typedef struct data_struct_s
-{
-    char key_string[KEY_MAX_LENGTH];
-    int number;
-} data_struct_t;" //TODO
-	"#include<hashmap.h>\n"+
-	"hashmap var_map;\n"+
-	"int main(){\n"+
-	"varmap = hashmap_new();\n");
+    fprintf(yyout, header);
 	yyparse();
-	fprintf(yyout, "\nreturn 0;}");
+	fprintf(yyout, footer);
     
 	/* now check EOF condition */
 	if(!parsing_done) /* in the middle of a screen */

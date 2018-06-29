@@ -1,3 +1,6 @@
+#ifndef __PARSER_H
+#define __PARSER_H
+
 #define NSYMS 20 /* maximum number of symbols */
 
 enum var_type_t { UNDEF, NUMBER, STRING };
@@ -26,11 +29,16 @@ Value {
 
 num add 1 //.dank
 
-varMap.get("num").numValue = 1 //.c
+__dank_getvar("num").numValue = 1 //.c
 
 var asd //.dank
+
+__dank_define("asd")
 
 */
 
 
 struct symtab *symlook();
+
+
+#endif
