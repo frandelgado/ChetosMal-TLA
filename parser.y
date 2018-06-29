@@ -53,8 +53,8 @@ char * writeBool(struct value * v1, op_t operation, struct value * v2);
 
 %%
 
-file: 		  file statement { printf($2); free($2); }
-			| statement { printf($1); free($1); }
+file: 		  file statement { fprintf(yyout, $2); free($2); }
+			| statement { fprintf(yyout, $1); free($1); }
 			;
 
 statements:   statements statement { $$ = realloc($1, strlen($1) + strlen($2) + 1); strcat($$, $2); free($2); }
