@@ -104,9 +104,11 @@ statement:
 								yyerror("Attempt to use an undefined variable");
 								break;
 							case TYPE_STRING:
+								$1->var_type = TYPE_STRING;
 								sprintf($$, "__dank_getvar(\"%s\")->strValue = %s;\n", $1->name, $3->str);
 								break;
 							case TYPE_NUMBER:
+								$1->var_type = TYPE_NUMBER;
 								sprintf($$, "__dank_getvar(\"%s\")->numValue = %s;\n", $1->name, $3->str);
 								break;
 						}
@@ -119,10 +121,10 @@ statement:
 								yyerror("Attempt to use an undefined variable");
 								break;
 							case TYPE_STRING:
-								sprintf($$, "printf(\"%%s\n\", %s);\n", $2->str);
+								sprintf($$, "printf(\"%s\", %s);\n", "%%s\\n", $2->str);
 								break;
 							case TYPE_NUMBER:
-								sprintf($$, "printf(\"%%g\n\", %s);\n", $2->str);
+								sprintf($$, "printf(\"%s\", %s);\n", "%%g\\n", $2->str);
 								break;
 						}
 						//free($2->str);
