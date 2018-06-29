@@ -69,7 +69,7 @@ statement:
 						} else {
 							$2->isDeclared = DECLARED;
 							$$ = malloc(strlen($2->name) + 18); $$[0] = 0;
-							sprintf($$, "__dank_define(%s);\n", $2->name);
+							sprintf($$, "__dank_define(\"%s\");\n", $2->name);
 						}
 			  }
 			| VAR ID ASSIGN value END_LINE {
