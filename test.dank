@@ -1,18 +1,18 @@
-var num1 assignment 2 end_line
-var num2 assignment 3 end_line
-if num2 equals num1 then
-    num1 assignment 13 end_line
+var num1 assign 2 end_line
+var num2 assign 3 end_line
+if num2 eq num1 then
+    num1 assign 13 end_line
 else
-    num1 assignment 14 end_line
+    num1 assign 14 end_line
 end_if
 while num2 greater 0 do
-    num2 assignment num2 minus 1 end_line
+    num2 assign num2 sub 1 end_line
 end_while
-if num2 equals 0 and not num1 equals 2 then
-    num1 assignment 13 end_line
+if ( num2 eq 0 and not num1 eq 2 ) then
+    num1 assign 13 end_line
 end_if 
    
-var string1 assignment "Three" end_line
-var sum1 assignment 5 addition 4 end_line
-var sum2 assignment num1 addition num2 end_line
-sum5 assignment 7 end_line
+var string1 assign "Three" end_line
+var sum1 assign 5 add 4 end_line
+var sum2 assign num1 add num2 end_line
+sum5 assign 7 end_line

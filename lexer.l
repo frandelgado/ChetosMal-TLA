@@ -1,6 +1,6 @@
 %{
-#include "y.tab.h"
 #include "parser.h"
+#include "y.tab.h"
 #include <string.h>
 
 extern int lineno;
@@ -27,7 +27,7 @@ nl        \n
             return STRING;
     }
     else{
-        yylval.number = strdup(yytext);
+        yylval.string = strdup(yytext);
         return NUMBER;
     }
     }

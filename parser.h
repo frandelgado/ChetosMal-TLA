@@ -3,9 +3,9 @@
 
 #define NSYMS 20 /* maximum number of symbols */
 
-enum var_type_t { UNDEF, NUMBER, STRING };
+typedef enum { TYPE_UNDEF, TYPE_NUMBER, TYPE_STRING } var_type_t;
 
-enum op_t { GREATER, GREATER_EQ, LESSER, LESSER_EQ, EQUALS, NOT_EQ };
+typedef enum { OP_GREATER, OP_GREATER_EQ, OP_LESSER, OP_LESSER_EQ, OP_EQUALS, OP_NOT_EQ } op_t;
 
 struct symtab
 {
@@ -19,26 +19,10 @@ struct value{
     char * str;
     var_type_t var_type;
 };
-/*
-Map<String, Value> varMap;
-
-Value {
-    double numValue;
-    string strValue;
-}
-
-num add 1 //.dank
-
-__dank_getvar("num").numValue = 1 //.c
-
-var asd //.dank
-
-__dank_define("asd")
-
-*/
-
 
 struct symtab *symlook();
+
+void warning(char *s, char *t);
 
 
 #endif
