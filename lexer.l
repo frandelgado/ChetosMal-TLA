@@ -32,33 +32,33 @@ nl        \n
         return NUMBER;
     }
     }
-var             { return VAR; }
-if              { return IF; }
-then            { return THEN; }
-else            { return ELSE; }
-end_if          { return END_IF; }
-while           { return WHILE; }
-do              { return DO; }
-end_while       { return END_WHILE; }
-not             { return NOT; }
-and             { return AND; }
-or              { return OR; }
-eq              { return EQUALS; }
-not_eq          { return NOT_EQUALS; }
-greater         { return GREATER; }
-greater_eq      { return GREATER_EQ; }
-lesser          { return LESSER; }
-lesser_eq       { return LESSER_EQ; }
-add             { return SUM; }
-sub             { return SUB; }
-mul             { return MUL; }
-div             { return DIV; }
-mod             { return MOD; }
-assign          { return ASSIGN; }
-end_line        { return END_LINE; }
-par_open        { return PARENTHESIS_OPENED; }
-par_close       { return PARENTHESIS_CLOSED; }
-print           { return PRINT; }
+ESTE            { return VAR; }
+CAMISAKI        { return IF; }
+PANTALOCITO     { return THEN; }
+QUECORTECITO    { return ELSE; }
+ANIANIAY        { return END_IF; }
+MIENTRAS        { return WHILE; }
+VOSSEGUIME      { return DO; }
+GRACIASPERRO    { return END_WHILE; }
+NIAPALOS        { return NOT; }
+I               { return AND; }
+O               { return OR; }
+IGUAL           { return EQUALS; }
+NOIGUAL         { return NOT_EQUALS; }
+REALFA          { return GREATER; }
+MASALFA         { return GREATER_EQ; }
+REBETA          { return LESSER; }
+MENOSBETA       { return LESSER_EQ; }
+\+               { return SUM; }
+-               { return SUB; }
+\*               { return MUL; }
+\/               { return DIV; }
+%               { return MOD; }
+SELADADE        { return ASSIGN; }
+XD              { return END_LINE; }
+\(               { return PARENTHESIS_OPENED; }
+\)               { return PARENTHESIS_CLOSED; }
+PIPI            { return PRINT; }
 {id}            { yylval.symp = symlook(yytext);
                   return ID;
                 }
