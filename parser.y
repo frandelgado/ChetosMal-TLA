@@ -82,9 +82,11 @@ statement:
 									yyerror("Attempt to use an undefined variable");
 									break;
 								case TYPE_STRING:
+									$2->var_type = TYPE_STRING;
 									sprintf(assig, "__dank_getvar(\"%s\")->strValue = %s;\n", $2->name, $4->str);
 									break;
 								case TYPE_NUMBER:
+									$2->var_type = TYPE_STRING;
 									sprintf(assig, "__dank_getvar(\"%s\")->numValue = %s;\n", $2->name, $4->str);
 									break;
 							}
