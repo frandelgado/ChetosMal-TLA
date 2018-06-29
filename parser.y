@@ -115,7 +115,8 @@ statement:
 						//free($3->str);
 			}
 			| PRINT value END_LINE {
-						$$ = malloc(strlen($2->str) + 19);
+						$$ = malloc(strlen($2->str) + 25);
+						printf("%s", $2->str);
 						switch($2->var_type) {
 							case TYPE_UNDEF:
 								yyerror("Attempt to use an undefined variable");
@@ -161,10 +162,11 @@ statement:
 						free($4);}
 			;
 
-value:	 	  STRING {$$->var_type = TYPE_STRING; $$->str = strdup($1);}
-			| NUMBER {$$->var_type = TYPE_NUMBER; $$->str = strdup($1);}
-			| operation {$$->var_type = $1->var_type; $$->str = $1->str;}
+value:	 	  STRING {$$ = malloc(sizeof(struct value)); $$->var_type = TYPE_STRING; $$->str = strdup($1);}
+			| NUMBER {$$ = malloc(sizeof(struct value)); $$->var_type = TYPE_NUMBER; $$->str = strdup($1);}
+			| operation {$$ = $1; }
 			| ID {
+						$$ = malloc(sizeof(struct value));
 						$$->str = malloc(strlen($1->name) + 33);
 						switch($1->var_type) {
 							case TYPE_UNDEF:
