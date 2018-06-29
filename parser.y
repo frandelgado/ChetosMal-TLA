@@ -234,16 +234,16 @@ char * writeBool(struct value * v1, op_t operation, struct value * v2) {
 				op_str = "!=";
 				break;
 			case OP_GREATER:
-				op_str = "!=";
+				op_str = ">";
 				break;
 			case OP_GREATER_EQ:
-				op_str = "!=";
+				op_str = ">=";
 				break;
 			case OP_LESSER:
-				op_str = "!=";
+				op_str = "<";
 				break;
 			case OP_LESSER_EQ:
-				op_str = "!=";
+				op_str = "<=";
 				break;
 		}
 	if(v1->var_type != v2->var_type) {
