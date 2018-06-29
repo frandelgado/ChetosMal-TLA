@@ -24,7 +24,7 @@ var_t * __dank_getvar(char * varname) {\n\
 }\n\
 char * __dank_dtoa(double val) {\n\
     char * str = malloc(128);\n\
-    sprintf(str, \"%%g\", val);\n\
+    sprintf(str, \"%g\", val);\n\
     return str;\n\
 }\n\
 int __dank_dtoi(double val) {\n\

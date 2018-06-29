@@ -438,9 +438,9 @@ void main(int argc, char **argv)
     
 	/* normal interaction on yyin and 
 	   yyout from now on */
-    fprintf(yyout, header);
+	fputs(header, yyout);
 	yyparse();
-	fprintf(yyout, footer);
+	fputs(footer, yyout);
     
 	/* now check EOF condition */
 	if(!parsing_done) /* in the middle of a screen */
