@@ -63,23 +63,28 @@ statements:   statements statement { $$ = realloc($1, strlen($1) + strlen($2) + 
 
 statement:   
 			  VAR ID END_LINE { 
-				  		if($2->var_type != TYPE_UNDEF) {
-							yyerror("Variable already defined");
+				  		if($2->isDeclared != UNDECLARED) {
+							yyerror("Variable already declared");
+							exit(1);
 						} else {
+							$2->isDeclared = DECLARED;
 							$$ = malloc(strlen($2->name) + 18); $$[0] = 0;
 							sprintf($$, "__dank_define(%s);\n", $2->name);
 						}
 			  }
 			| VAR ID ASSIGN value END_LINE {
-						if($2->var_type != TYPE_UNDEF) {
-							yyerror("Variable already defined");
+						if($2->isDeclared != UNDECLARED) {
+							yyerror("Variable already declared");
+							exit(1);
 						} else {
+							$2->isDeclared = DECLARED;
 							char * def = malloc(strlen($2->name) + 18);
 							sprintf(def, "__dank_define(\"%s\");\n", $2->name);
 							char * assig = malloc(strlen($2->name) + strlen($4->str) + 40);
 							switch($4->var_type) {
 								case TYPE_UNDEF:
 									yyerror("Attempt to use an undefined variable");
+									exit(1);
 									break;
 								case TYPE_STRING:
 									$2->var_type = TYPE_STRING;
@@ -98,27 +103,34 @@ statement:
 						}
 			}
             | ID ASSIGN value END_LINE {
-						$$ = malloc(strlen($1->name) + strlen($3->str) + 36);
-						switch($3->var_type) {
-							case TYPE_UNDEF:
-								yyerror("Attempt to use an undefined variable");
-								break;
-							case TYPE_STRING:
-								$1->var_type = TYPE_STRING;
-								sprintf($$, "__dank_getvar(\"%s\")->strValue = %s;\n", $1->name, $3->str);
-								break;
-							case TYPE_NUMBER:
-								$1->var_type = TYPE_NUMBER;
-								sprintf($$, "__dank_getvar(\"%s\")->numValue = %s;\n", $1->name, $3->str);
-								break;
+						if ($1->isDeclared != DECLARED) {
+							yyerror("Variable was never declared");
+							exit(1);
+						} else {
+							$$ = malloc(strlen($1->name) + strlen($3->str) + 36);
+							switch($3->var_type) {
+								case TYPE_UNDEF:
+									yyerror("Attempt to use an undefined variable");
+									exit(1);
+									break;
+								case TYPE_STRING:
+									$1->var_type = TYPE_STRING;
+									sprintf($$, "__dank_getvar(\"%s\")->strValue = %s;\n", $1->name, $3->str);
+									break;
+								case TYPE_NUMBER:
+									$1->var_type = TYPE_NUMBER;
+									sprintf($$, "__dank_getvar(\"%s\")->numValue = %s;\n", $1->name, $3->str);
+									break;
+							}
+							//free($3->str);
 						}
-						//free($3->str);
 			}
 			| PRINT value END_LINE {
 						$$ = malloc(strlen($2->str) + 25);
 						switch($2->var_type) {
 							case TYPE_UNDEF:
 								yyerror("Attempt to use an undefined variable");
+								exit(1);
 								break;
 							case TYPE_STRING:
 								sprintf($$, "printf(\"%s\", %s);\n", "%%s\\n", $2->str);
@@ -170,6 +182,7 @@ value:	 	  STRING {$$ = malloc(sizeof(struct value)); $$->var_type = TYPE_STRING
 						switch($1->var_type) {
 							case TYPE_UNDEF:
 								yyerror("Attempt to use an undefined variable");
+								exit(1);
 								break;
 							case TYPE_STRING:
 								sprintf($$->str, " __dank_getvar(\"%s\")->strValue ", $1->name);
@@ -247,6 +260,7 @@ char * writeBool(struct value * v1, op_t operation, struct value * v2) {
 		}
 	if(v1->var_type != v2->var_type) {
 		yyerror("Attempt to compare number with string");
+		exit(1);
 	} else if (v1->var_type == TYPE_STRING) {
 		out = malloc(strlen(v1->str) + strlen(v2->str) + 21);
 		sprintf(out, " strcmp(%s, %s) %s 0 ", v1->str, v2->str, op_str);
@@ -276,6 +290,7 @@ struct value * sub(struct value *v1, struct value *v2) {
 		return operate(v1, v2, "-");
 	} else {
 		yyerror("Can't substract strings");
+		exit(1);
 	}
 }
 
@@ -284,6 +299,7 @@ struct value * mul(struct value *v1, struct value *v2) {
 		return operate(v1, v2, "*");
 	} else {
 		yyerror("Can't multiply strings");
+		exit(1);
 	}
 }
 
@@ -292,6 +308,7 @@ struct value * mod(struct value *v1, struct value *v2) {
 		return operate(v1, v2, "%");
 	} else {
 		yyerror("Can't modulo strings");
+		exit(1);
 	}
 }
 
@@ -303,6 +320,7 @@ struct value * divi(struct value *v1, struct value *v2) {
 		return operate(v1, v2, "/");
 	} else {
 		yyerror("Can't divide strings");
+		exit(1);
 	}
 }
 
@@ -447,6 +465,7 @@ struct symtab *symlook(char const *s)
 		if(!sp->name) {
 			sp->name = strdup(s);
 			sp->var_type = TYPE_UNDEF;
+			sp->isDeclared = UNDECLARED;
 			return sp;
 		}
 		/* otherwise continue to next */
@@ -454,4 +473,5 @@ struct symtab *symlook(char const *s)
 	yyerror("Too many symbols");
 	exit(1);	/* cannot continue */
 } /* symlook */
+
 
