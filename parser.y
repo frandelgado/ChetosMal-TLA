@@ -185,8 +185,8 @@ value:	 	  STRING {$$ = malloc(sizeof(struct value)); $$->var_type = TYPE_STRING
 			;
 
 		
-condition: 	  NOT condition { 	$$ = malloc(strlen($2) + 2); $$[0] = 0; 
-								strcat($$, "!"); strcat($$, $2);
+condition: 	  NOT condition { 	$$ = malloc(strlen($2) + 4); $$[0] = 0; 
+								strcat($$, "!("); strcat($$, $2); strcat($$, ")");
 								free($2); }
 			| PARENTHESIS_OPENED condition logic_op condition PARENTHESIS_CLOSED {//NO HACER FREE DE logic_op
 								$$ = malloc(strlen($2) + strlen($3) + strlen($4) + 3); $$[0] = 0;
@@ -210,8 +210,8 @@ comparation:  GREATER 		{ $$ = OP_GREATER; }
 			| NOT_EQUALS	{ $$ = OP_NOT_EQ; }
 			;
 
-logic_op: 	  AND		{ $$ = "&&"; } 
-			| OR 		{ $$ = "||"; }
+logic_op: 	  AND		{ $$ = " && "; } 
+			| OR 		{ $$ = " || "; }
 			;
 
 operation:    value SUM value { $$ = sum($1, $3); } 

@@ -2,6 +2,7 @@
 
 static const char* header = "\
 #include <stdlib.h>\n\
+#include <stdio.h>\n\
 #include <string.h>\n\
 #include \"hashmap.h\"\n\
 #define KEY_MAX_LENGTH (256)\n\
